@@ -75,3 +75,5 @@ def process_file(file_name, slice_size):
     except:
         print("Error Processing "+file_name)
         return False
+
+def process_directory():
