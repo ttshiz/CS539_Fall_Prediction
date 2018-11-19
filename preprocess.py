@@ -1,16 +1,19 @@
 import numpy as np
 import sklearn as sk
 
+from collections import Counter
+
 FALL_LABELS = set([b'FOL', b'FKL', b'BSC', b'SDL'])
 
 #one dimension
 def zero_crossings(slice):
     return np.where(np.diff(np.signbit(slice)))[0].size
 
-#one dimension
-def avg_slope(slice):
-    return np.mean(np.diff(slice))
-
+#Wafaa's metric
+def min_max_distance(slice):
+    return np.sqrt(np.square(np.amax(slice) - np.amin(slice))
+                   + (np.square(np.argmax(slice) - np.argmin(slice))))
+    
 # for each dimension still need to set
 def process_slice(slice):
     slice_features = dict()
@@ -38,14 +41,19 @@ def process_slice(slice):
     slice_features["y_zc"] = zero_crossings(slice["acc_y"])
     slice_features["z_zc"] = zero_crossings(slice["acc_z"])
 
-    # label each timeslice with the label of the last index unless it is a fall
+    slice_features["x_mmd"] = min_max_distance(slice["acc_x"])
+    slice_features["y_mmd"] = min_max_distance(slice["acc_y"])
+    slice_features["z_mmd"] = min_max_distance(slice["acc_z"])
+
+    # label each timeslice with the label of the majority class unless it is a fall
     falls = FALL_LABELS.intersection(set(slice["label"]))
-    slice_features["label"] = falls.pop() if falls else slice["label"][-1]
+    slice_features["label"] = falls.pop() if falls else Counter(
+        slice["label"]).most_common(1)[0][0]
 
     return slice_features
  
 def process_file(file_name, slice_size):
-    #try:
+    try:
         data = np.genfromtxt(file_name, dtype=None, delimiter=',', names=True)
         feature_list = []
         start_time = data[0]["timestamp"]
@@ -64,6 +72,6 @@ def process_file(file_name, slice_size):
                 snum = snum + 1
                 slice_start = slice_end
         return feature_list
-    #except:
+    except:
         print("Error Processing "+file_name)
         return False
