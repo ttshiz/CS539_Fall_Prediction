@@ -1,3 +1,5 @@
+import glob
+import json
 import numpy as np
 import sklearn as sk
 
@@ -67,13 +69,24 @@ def process_file(file_name, slice_size):
             if (data[slice_end]["timestamp"] < start_time + snum*slice_size):
                 slice_end = slice_end + 1
             # otherwise consider slice complete and process
-            else:
+            elif (slice_start < slice_end):
                 feature_list.append(process_slice(data[slice_start:slice_end]))
                 snum = snum + 1
                 slice_start = slice_end
+            else:
+                break
         return feature_list
     except:
         print("Error Processing "+file_name)
         return False
 
-def process_directory():
+def process_directory(slice_size):
+    data = dict(slice_size=slice_size)
+    for file in glob.glob("MobiAct_Dataset_v2.0/**/*_annotated.csv", recursive=True):
+        data[file] = process_file(file, slice_size)
+    return data
+
+def write_to_json(data):
+    with open("preprocessed"+str(data["slice_size"])+".json", "w") as fp:
+        json.dump(data, fp)
+
