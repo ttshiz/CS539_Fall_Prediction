@@ -87,14 +87,37 @@ def calc_cross_val_aggregates(scores):
     return mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec
 
 def main():
-    filename = "preprocessed_1.0E+09.json"
-    num_slices = 1
+    max_slice_size_file =  "preprocessed_6.0E+09.json"
+    files = ["preprocessed_5.0E+09.json", "preprocessed_2.5E+09.json"
+             ,  "preprocessed_1.0E+09.json", "preprocessed_5.0E+08.json"
+             ,  "preprocessed_2.5E+08.json", "preprocessed_5.0E+07.json"
+             ,  "preprocessed_2.5E+07.json",  "preprocessed_5.0E+06.json"]
+    num_slices = dict()
+    # time_slice(nanoseconds) * number_of_slices <= 6 seconds
+    num_slices["preprocessed_6.0E+09.json"] = [1]
+    num_slices["preprocessed_5.0E+09.json"] = [1]
+    num_slices["preprocessed_2.5E+09.json"] = [1, 2]
+    num_slices["preprocessed_1.0E+09.json"] = [1, 2, 4]
+    num_slices["preprocessed_5.0E+08.json"] = [1, 2, 4, 8]
+    num_slices["preprocessed_2.5E+08.json"] = [1, 2, 4, 8, 16]
+    num_slices["preprocessed_5.0E+07.json"] = [1, 2, 4, 8, 16, 32]
+    num_slices["preprocessed_2.5E+07.json"] = [1, 2, 4, 8, 16, 32, 64]
+    num_slices["preprocessed_5.0E+06.json"] = [1, 2, 4, 8, 16, 32, 64, 128]
+    
+    single_filename = "preprocessed_1.0E+09.json"
+
     k = 10
-    s = do_cross_validation(filename, num_slices, k)
+    
+    s = do_cross_validation(single_filename, num_slices[single_filename][0], k)
+    # want calc_cross_valaggregates for each run associated with run parameters
     #mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec = calc_cross_val_aggregates(s)
     #stout = "\t mean \t max \n" + "\t" + mean_acc + "\t" + max_acc + "\n"
     #stout = stout + "\t" + mean_prec + "\t" + max_prec + "\n"
     #stout = stout +"\t" + mean_rec+ "\t"+ max_rec + "\n"
     #stout = stout + "\t" + mean_f1 + "\t" + max_f1 +"\n"
     #print(stout)
+    # want confusion matrix for best pair of file and num_slices
+    # time provided runs:
+    #num_slices_reach = [256, 512, 1024]
+    #reach_files = ["preprocessed_5.0E+06.json"]
     return s
