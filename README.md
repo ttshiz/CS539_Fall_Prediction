@@ -1,26 +1,27 @@
-﻿#Efficient Early Fall Detection Technique
+﻿# CS539 
+# Efficient Early Fall Detection Technique
 
-##Introduction and Rationale
+## Introduction and Rationale
 Falls are a major source of loss of autonomy, deaths and injuries among the elderly and have a remarkable impact on the costs of national health systems. The World Health Organization (WHO) reported that 28–35% of people aged 65 and above fall each year. This rate increases to 32–42% for those over 70 years of age. As a result, there has been a dramatic increase in the growing body of research on fall detection system in the last few years. However, most of this previous work in fall detection required specialized hardware and software which is expensive to maintain. In addition to the cost and complexity of these fall detection systems; there are still limitations on their accuracy and versatility, preventing routine use of this process in clinical practice. In a recent paper by [1], they reviewed 57 projects that used wearable devices to detect falls in elderly. However, only 7.1% of the projects reported testing their models in a real-world setting. Furthermore, while some studies that used sensors and wearable devices attached to monitored subjects have shown the ability to achieve higher detection accuracy; those wearable devices are not well-accepted by elderly people because of their obtrusiveness and limited mobility.  Finally, very few of the studies have even attempted to try to predict the falls.  Predicting falls effectively could mean lives saved even before injury. 
 Considering aforementioned challenges, we aim to design, develop, and perform preliminary testing of a novel and efficient technique that can be implemented in an embedded hardware device such as smartphone to identify and possibly even predict falls before they happen. The work will be focus on the use of fast and efficient techniques based on new statistical features and classification will be performed using the most commonly used machine-learning based classifiers in literature.
 
-##Dataset Selection and Description
+## Dataset Selection and Description
 Since there is not much research into fall prediction or extremely early detection using smartphones or strategies that would be extensible to the sensors found in smartphones such as wearable Fall Detection Systems (FDS), the authors expanded the dataset search criteria to include datasets used or collected for fall detection studies.  Furthermore, since smartphone data or a similar enough set of sensors was desired, the subset of fall detection studies or datasets that was most appropriate was ones where they tested FDS systems or collected the requisite data for such testing.  The FARSEEING real-world fall repository was considered because it has real, not simulated, fall accelerometer measurements.  The drawbacks of this dataset is that only 20 fall events are available upon request and further collaboration for full access is likely outside the scope of a term project. If access to the 20 fall events is made available, it may be used as testing data.  
-###Example Data Instance
+### Example Data Instance
 An example of a slice of the time series data from one data collection trial from the MobiAct dataset is as follows: 
 1913880219000, 0.90021986, -9.557653, -1.4939818
 1914086499000, 0.7565677, -9.5385, -1.13964
 1914287283000, 1.0151415, -9.490616, -1.292869
 The first entry in each tuple is the time stamp, followed by the acceleration force along the x, y, and z axes respectively.
-##Algorithm Selection
-###Preprocessing
+## Algorithm Selection
+### Preprocessing
 Due to the temporal nature of the data methods, we will test using a grid search to find appropriate slicing of the data, a Fourier Transform based approach, and time permitting combinations of the two or other methods of extracting features from the time sequence.
 ###Main Algorithm
 There are several factors being considered in algorithm selection. Given the sizes of the available datasets overfitting is a major concern.  Furthermore, since there are various smartphones on the market and for the longevity of the usefulness of the tool, the techniques used will need to be tolerant to this variability.  Some of the top candidates for the main algorithm include Recurrent Neural Networks (RNN), Support Vector Machines (SVM), and Hidden Markov Models (HMM).  RNNs are considered due to their ability to perform reasonably on temporal data approach. Similarly since, some of the previous work on fall detection has found some success with SVMs and HMMs they may also be a good candidate for prediction.  All of these techniques have the potential for better results than basic statistical thresholding, since they may reduce false positives.
-###Metrics
+### Metrics
 To evaluate the tool: F1 Scoring and k-fold cross-validation will be used.  Time permitting the tool will also be tested on one or more of the datasets listed above but not used in the training of the tool.
 
-##Future Work
+## Future Work
 Since, of the publicly available datasets, the majority of the datasets are not very large.  Thus, the first step of the project will be finding the subset of the datasets: DLR, MobiAct, TST Fall detection, tFall, UR Fall Detection, Cogent Labs, Gravity Project, Graz, UMAFall, SisFall, and UniBiB SHAR that is most compatible with both each other and the goals of the project.
 Since, the parameters of the samples vary across the datasets finding a compatible subset and appropriate means of normalizing the data will facilitate further study.  For example, the sampling rate for the provided accelerometer data varies between 5 and 256 Hz across the datasets.  The sample duration in seconds and variance also varies across the data sets: the shortest mean sample of a study is 1s seconds and the longest is 27.53 seconds, while the shortest sample is 0.18 seconds and the longest sample is 961.23 seconds.  Each of the studies also has labels for each of the samples.  These labels are broken into two categories: Falls and Activities of Daily Living (ADLs).  Each study has 1 to 19 types of ADLs and 1 to 15 types of falls, but these labels are not normalized across the datasets.  These are some of the many variables that prohibit, the blind combination of the datasets.
 However what is most important to this study each of these datasets have in common.  Each of the datasets listed above have accelerometer data for at least one body location, and furthermore half of the datasets used the Inertial Measurement Unit (IMU) in a smartphone for at least a portion of the data they collected.  This half will be considered first for the study since the data is more directly compatible with the goals of the project.   
