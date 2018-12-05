@@ -35,6 +35,11 @@ def run_one_HMM(X_train, X_test, prepro_param, num_states=3, num_iter=10, covar_
                 , rand_seed=None, run_count=1):
     model = hmm.GaussianHMM(n_components=num_states, covariance_type=covar_type
                             , random_state=rand_seed, n_iter=num_iter)
+    #TODO: add logic to split training data by  class,
+    # train an HMM for each class
+    # and for each datum in X_test
+    ## calculate the probability in each of the models
+    ## then set the predicted label to the class of the HMM with the highest probability
     model.fit(X_train)
     Y_predict = model.predict(X_test)
     filename = "hmm_pre_" + prepro_param + "states_" + str(num_states) + "iter_"
