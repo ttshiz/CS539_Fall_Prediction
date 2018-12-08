@@ -1,5 +1,9 @@
+import operator
 import load_data
 import numpy as np
+import pandas as pd
+import math
+from itertools import chain
 from hmmlearn import hmm
 from sklearn.externals import joblib
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -27,25 +31,49 @@ def matrix_n_report(Y_truth, Y_predict, filename=None):
     cr = classification_report(Y_truth, Y_predict, output_dict=True)
     cm = confusion_matrix(Y_truth, Y_predict)
     return cr, cm
-    
 
 # Trains HMM on X_train set, predicts labels on X_test set, dumps model to file,
 # and returns predicted labels
-def run_one_HMM(X_train, X_test, prepro_param, num_states=3, num_iter=10, covar_type='diag'
-                , rand_seed=None, run_count=1):
-    model = hmm.GaussianHMM(n_components=num_states, covariance_type=covar_type
-                            , random_state=rand_seed, n_iter=num_iter)
-    #TODO: add logic to split training data by  class,
-    # train an HMM for each class
-    # and for each datum in X_test
+def run_hmmlG(X_train, Y_train, X_test, Y_test, prepro_param, num_states=3
+              , num_iter=10000000, covar_type='diag', rand_seed=None, run_count=1):
+    labels = set(Y_train+Y_test)
+    model = dict()
+    for l in labels:
+        # train an HMM for each class
+        # and for each datum in X_test
+        model[l] = hmm.GaussianHMM(n_components=num_states, covariance_type=covar_type
+                                  , random_state=rand_seed, n_iter=num_iter)
+        X_l = list()
+        for (x, y) in zip(X_train, Y_train):
+            if y == l:
+                X_l.insert(0, x)
+        model[l].fit(np.array([[s] for s in chain.from_iterable(X_l)]), [len(x) for x in X_l])
     ## calculate the probability in each of the models
     ## then set the predicted label to the class of the HMM with the highest probability
-    model.fit(X_train)
-    Y_predict = model.predict(X_test)
+    Y_predict = list()
+    #X_test_np = np.array([[s] for s in chain.from_iterable(X_test)])
+    #X_test_lens = [len(x) for x in X_test]
+    for t in X_test:
+        br = -100000
+        lbl = None
+        for l in labels:
+            r = model[l].score(np.array([[v] for v in t]), [len(t)])
+            print(l, r)
+            if r > br:
+                br = r
+                lbl = l
+        Y_predict.append(lbl)
+    Y_res = Y_predict
+    #Y_res = list()
+    #for Y in pd.DataFrame(Y_predict).to_dict('record'):
+    #    print(Y)
+    #    Y_res.insert(0, max(Y.items(), key=operator.itemgetter(1))[0])
+    #Y_res.reverse()
     filename = "hmm_pre_" + prepro_param + "states_" + str(num_states) + "iter_"
     filename = filename + str(num_iter) + "run_" + str(run_count) + ".pkl"
     joblib.dump(model, filename)
-    return Y_predict
+    print(Y_res)
+    return Y_res
 
 # Runs k-fold Cross Validation on preprocessed data found in filename
 # with num_slices the number of preprocessed slices to include in each sample
@@ -59,12 +87,12 @@ def do_cross_validation(filename, num_slices, k):
     run_num = 1
     for ((X_train, Y_train), (X_test, Y_test)) in data_gen:
         prepro_param = filename[13:-5]
-        Y_predicted = run_one_HMM(X_train, X_test, prepro_param, run_num)
-        #a, f, p, r = calc_metrics(Y_test, Y_predicted)
-        #accuracies.extend(0, a)
-        #f1s.extend(0, f)
-        #precisions.extend(0, p)
-        #recalls.extend(0, r)
+        Y_predicted = run_one_HMM(X_train, Y_train, X_test, Y_train, prepro_param, run_num)
+        a, f, p, r = calc_metrics(Y_test, Y_predicted)
+        accuracies.extend(0, a)
+        f1s.extend(0, f)
+        precisions.extend(0, p)
+        recalls.extend(0, r)
         run_num = run_num +1
         break # comment out for full run, only here for testing
     scores["accuracies"] = accuracies
@@ -74,7 +102,6 @@ def do_cross_validation(filename, num_slices, k):
     return scores
 
 def calc_cross_val_aggregates(scores):
-    
     mean_acc = np.mean(scores["accuracies"])
     mean_f1 = np.mean(scores["f1s"])
     mean_prec = np.mean(scores["precisions"])
@@ -85,6 +112,8 @@ def calc_cross_val_aggregates(scores):
     max_prec = np.max(scores["precisions"])
     max_rec = np.max(scores["recalls"])
     return mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec
+
+run_one_HMM = run_hmmlG
 
 def main():
     max_slice_size_file =  "preprocessed_6.0E+09.json"
@@ -121,3 +150,6 @@ def main():
     #num_slices_reach = [256, 512, 1024]
     #reach_files = ["preprocessed_5.0E+06.json"]
     return s
+
+if __name__ == "__main__":
+    main()
