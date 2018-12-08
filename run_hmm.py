@@ -1,7 +1,7 @@
 import operator
 import load_data
 import numpy as np
-import pandas as pd
+#import pandas as pd
 import math
 from itertools import chain
 from hmmlearn import hmm
@@ -19,12 +19,12 @@ def setup(filename, num_slices, k=10):
 # Calculates metrics based on predicted and actual labels using global true positive,
 # false negative, and false positive counts where applicable
 def calc_metrics(Y_truth, Y_predict):
-    #acc = accuracy_score(Y_truth, Y_predict)
-    #f1 = f1_score(Y_truth, Y_predict, average='micro')
-    #prec = precision_score(Y_truth, Y_predict, average='micro')
-    #rec = recall_score(Y_truth, Y_predict, average='micro')
-    #return acc, f1, prec, rec
-    return None
+    acc = accuracy_score(Y_truth, Y_predict)
+    f1 = f1_score(Y_truth, Y_predict, average='micro')
+    prec = precision_score(Y_truth, Y_predict, average='micro')
+    rec = recall_score(Y_truth, Y_predict, average='micro')
+    return acc, f1, prec, rec
+    #return None
 
 def matrix_n_report(Y_truth, Y_predict, filename=None):
     #Calculated dictionary of classification metrics mapping label: set of metrics
@@ -58,7 +58,7 @@ def run_hmmlG(X_train, Y_train, X_test, Y_test, prepro_param, num_states=3
         lbl = None
         for l in labels:
             r = model[l].score(np.array([[v] for v in t]), [len(t)])
-            print(l, r)
+            #print(l, r)
             if r > br:
                 br = r
                 lbl = l
@@ -89,10 +89,10 @@ def do_cross_validation(filename, num_slices, k):
         prepro_param = filename[13:-5]
         Y_predicted = run_one_HMM(X_train, Y_train, X_test, Y_train, prepro_param, run_num)
         a, f, p, r = calc_metrics(Y_test, Y_predicted)
-        accuracies.extend(0, a)
-        f1s.extend(0, f)
-        precisions.extend(0, p)
-        recalls.extend(0, r)
+        accuracies.append(a)
+        f1s.append(f)
+        precisions.append(p)
+        recalls.append(r)
         run_num = run_num +1
         break # comment out for full run, only here for testing
     scores["accuracies"] = accuracies
