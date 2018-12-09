@@ -1,5 +1,6 @@
 import load_data
 import util
+import json
 from sklearn.externals import joblib
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score
@@ -20,12 +21,10 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
     model.fit(X_train, Y_train)
     Y_predict = model.predict(X_test)
 
-    print("Running cross val "+str(run_count)+"....")
-    
+    print("Running cross val "+str(run_count)+"....")    
     #filename = "lr_pre_" + prepro_param + "solver_" + str(solver) + "iter_"
     #filename = filename + str(max_iter) + "run_" + str(run_count) + ".pkl"
     #joblib.dump(model, filename)
-    
     #print(Y_predict)
     return Y_predict
 
@@ -38,24 +37,42 @@ def do_cross_validation(filename, num_slices, k):
     f1s = []
     precisions = []
     recalls = []
+    f1s_weighted = []
+    precisions_weighted = []
+    recalls_weighted = []
+    f1s_micro = []
+    precisions_micro = []
+    recalls_micro = []
     run_num = 1
     for ((X_train, Y_train), (X_test, Y_test)) in data_gen:
         prepro_param = filename[13:-5]
         Y_predicted = run_one_LR(X_train, Y_train, X_test, Y_train, prepro_param
                                  , run_count=run_num)
-        a, f, p, r = calc_metrics(Y_test, Y_predicted)
+        a, f, p, r, f_w, p_w, r_w, f_m, p_m, r_m = calc_metrics(Y_test, Y_predicted)
         accuracies.append(a)
         f1s.append(f)
         precisions.append(p)
         recalls.append(r)
+        f1s_weighted.append(f_w)
+        precisions_weighted.append(p_w)
+        recalls_weighted.append(r_w)
+        f1s_micro.append(f_m)
+        precisions_micro.append(p_m)
+        recalls_micro.append(r_m)
         run_num = run_num +1
         print("accuracy: "+str(a)+" f1score: "+str(f)+" precision: "
-              +str(p)+" recall: "+str(r))
+              +str(p)+" recall: "+str(r)+" f1score weighted: "+str(f_w)+" precision weighted: "+str(p_w)+" recall weighted: "+str(r_w)+" f1score micro: "+str(f_m)+" precision micro: "+str(p_m)+" recall micro: "+str(r_m))
         #break # comment out for full run, only here for testing
     scores["accuracies"] = accuracies
     scores["f1s"] = f1s
     scores["precisions"] = precisions
     scores["recalls"] = recalls
+    scores["f1s_weighted"] = f1s_weighted
+    scores["precisions_weighted"] = precisions_weighted
+    scores["recalls_weighted"] = recalls_weighted
+    scores["f1s_micro"] = f1s_micro
+    scores["precisions_micro"] = precisions_micro
+    scores["recalls_micro"] = recalls_micro
     return scores
 
 def main():
@@ -79,20 +96,56 @@ def main():
     single_filename = "preprocessed_1.0E+09.json"
 
     k = 10
-    
-    s = do_cross_validation(single_filename, num_slices[single_filename][0], k)
-    print("scores "+str(s))
-    with open("metrics_"+single_filename, "w") as fp:
+
+    all_file_dict = dict()
+    for filename in files:
+        file_dict = dict()
+        for num_s in num_slices[filename]:
+            s = do_cross_validation(filename, num_s, k)
+            print("scores "+str(s))
+            with open("metrics_slice_num_"+str(num_s)+"_"+filename, "w") as fp:
+                json.dump(s, fp)
+            fp.close()
+            print("aggregates:")
+            # want calc_cross_valaggregates for each run associated with run parameters
+            file_dict = calc_cross_val_aggregates(s) 
+            stout = "\t mean \t max \n"+"acc \t"+str(file_dict["mean_acc"])+"\t"
+            stout = stout + str(file_dict["max_acc"]) +"\n"
+                                
+            stout = stout + "prec \t" + str(file_dict["mean_prec"]) + "\t"
+            stout = stout + str(file_dict["max_prec"]) + "\n"
+                                
+            stout = stout +"rec \t" + str(file_dict["mean_rec"]) + "\t"
+            stout = stout + str(file_dict["max_rec"]) + "\n"
+            
+            stout = stout + "f1 \t" + str(file_dict["mean_f1"]) + "\t"
+            stout = stout + str(file_dict["max_f1"]) +"\n"
+            
+            stout = stout + "prec_weighted \t" + str(file_dict["mean_prec_w"]) + "\t"
+            stout = stout + str(file_dict["max_prec_w"]) + "\n"
+            
+            stout = stout +"rec_weighted \t" + str(file_dict["mean_rec_w"]) + "\t"
+            stout = stout + str(file_dict["max_rec_w"]) + "\n"
+            
+            stout = stout + "f1_weighted \t" + str(file_dict["mean_f1_w"]) + "\t"
+            stout = stout + str(file_dict["max_f1_w"]) +"\n"
+            
+            stout = stout + "prec_micro \t" + str(file_dict["mean_prec_m"]) + "\t"
+            stout = stout + str(file_dict["max_prec_m"]) + "\n"
+            
+            stout = stout +"rec_micro \t" + str(file_dict["mean_rec_m"]) + "\t"
+            stout = stout + str(file_dict["max_rec_m"]) + "\n"
+            
+            stout = stout + "f1_micro \t" + str(file_dict["mean_f1_m"]) + "\t"
+            stout = stout + str(file_dict["max_f1_m"]) +"\n"
+
+            print(stout)
+            break; # comment out for full run
+        all_file_dict[filename] = file_dict
+        break; # comment out for full run
+    with open("results_summary.json", "w") as fp:
         json.dump(s, fp)
-    
-    print("aggregates:")
-    # want calc_cross_valaggregates for each run associated with run parameters
-    mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec = calc_cross_val_aggregates(s)
-    stout = "\t mean \t max \n" + "\t" + mean_acc + "\t" + max_acc + "\n"
-    stout = stout + "\t" + mean_prec + "\t" + max_prec + "\n"
-    stout = stout +"\t" + mean_rec+ "\t"+ max_rec + "\n"
-    stout = stout + "\t" + mean_f1 + "\t" + max_f1 +"\n"
-    print(stout)
+          
     # want confusion matrix for best pair of file and num_slices
     # time provided runs:
     #num_slices_reach = [256, 512, 1024]
