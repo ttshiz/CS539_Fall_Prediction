@@ -1,9 +1,5 @@
-import operator
 import load_data
 import math
-from itertools import chain
-from hmmlearn import hmm
-from sklearn.externals import joblib
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score
 
