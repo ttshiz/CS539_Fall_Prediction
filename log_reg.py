@@ -31,6 +31,7 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
 # Runs k-fold Cross Validation on preprocessed data found in filename
 # with num_slices the number of preprocessed slices to include in each sample
 def do_cross_validation(filename, num_slices, k):
+    print("Cross Validating: "+filename)
     data_gen = setup(filename, num_slices, k)
     scores = dict()
     accuracies = []
@@ -60,8 +61,10 @@ def do_cross_validation(filename, num_slices, k):
         precisions_micro.append(p_m)
         recalls_micro.append(r_m)
         run_num = run_num +1
-        print("accuracy: "+str(a)+" f1score: "+str(f)+" precision: "
-              +str(p)+" recall: "+str(r)+" f1score weighted: "+str(f_w)+" precision weighted: "+str(p_w)+" recall weighted: "+str(r_w)+" f1score micro: "+str(f_m)+" precision micro: "+str(p_m)+" recall micro: "+str(r_m))
+        #print("accuracy: "+str(a)+" f1score: "+str(f)+" precision: "+str(p)+" recall: "
+        #      +str(r)+" f1score weighted: "+str(f_w)+" precision weighted: "+str(p_w)
+        #      +" recall weighted: "+str(r_w)+" f1score micro: "+str(f_m)
+        #      +" precision micro: "+str(p_m)+" recall micro: "+str(r_m))
         #break # comment out for full run, only here for testing
     scores["accuracies"] = accuracies
     scores["f1s"] = f1s
@@ -75,10 +78,43 @@ def do_cross_validation(filename, num_slices, k):
     scores["recalls_micro"] = recalls_micro
     return scores
 
+def print_by_cross_val_run(file_dict):
+    stout = "\t mean \t max \n"+"acc \t"+str(file_dict["mean_acc"])+"\t"
+    stout = stout + str(file_dict["max_acc"]) +"\n"
+                                
+    stout = stout + "prec \t" + str(file_dict["mean_prec"]) + "\t"
+    stout = stout + str(file_dict["max_prec"]) + "\n"
+                                
+    stout = stout +"rec \t" + str(file_dict["mean_rec"]) + "\t"
+    stout = stout + str(file_dict["max_rec"]) + "\n"
+            
+    stout = stout + "f1 \t" + str(file_dict["mean_f1"]) + "\t"
+    stout = stout + str(file_dict["max_f1"]) +"\n"
+            
+    stout = stout + "prec_weighted \t" + str(file_dict["mean_prec_w"]) + "\t"
+    stout = stout + str(file_dict["max_prec_w"]) + "\n"
+            
+    stout = stout +"rec_weighted \t" + str(file_dict["mean_rec_w"]) + "\t"
+    stout = stout + str(file_dict["max_rec_w"]) + "\n"
+            
+    stout = stout + "f1_weighted \t" + str(file_dict["mean_f1_w"]) + "\t"
+    stout = stout + str(file_dict["max_f1_w"]) +"\n"
+            
+    stout = stout + "prec_micro \t" + str(file_dict["mean_prec_micro"]) + "\t"
+    stout = stout + str(file_dict["max_prec_micro"]) + "\n"
+            
+    stout = stout +"rec_micro \t" + str(file_dict["mean_rec_micro"]) + "\t"
+    stout = stout + str(file_dict["max_rec_micro"]) + "\n"
+            
+    stout = stout + "f1_micro \t" + str(file_dict["mean_f1_micro"]) + "\t"
+    stout = stout + str(file_dict["max_f1_micro"]) +"\n"
+
+    print(stout)
+            
 def main():
     max_slice_size_file =  "preprocessed_6.0E+09.json"
     files = ["preprocessed_5.0E+09.json", "preprocessed_2.5E+09.json"
-             ,  "preprocessed_1.0E+09.json", "preprocessed_5.0E+08.json"
+             ,  "preprocessed_1.0E+09.json"#, "preprocessed_5.0E+08.json"
              ,  "preprocessed_2.5E+08.json", "preprocessed_5.0E+07.json"
              ,  "preprocessed_2.5E+07.json",  "preprocessed_5.0E+06.json"]
     num_slices = dict()
@@ -107,51 +143,25 @@ def main():
         if filename in all_file_dict:
             continue
         file_dict = dict()
-        for num_s in num_slices[filename]:
-            s = do_cross_validation(filename, num_s, k)
-            print("scores "+str(s))
-            with open("metrics_slice_num_"+str(num_s)+"_"+filename, "w") as fp:
-                json.dump(s, fp)
-            fp.close()
-            print("aggregates:")
-            # want calc_cross_valaggregates for each run associated with run parameters
-            file_dict = calc_cross_val_aggregates(s) 
-            stout = "\t mean \t max \n"+"acc \t"+str(file_dict["mean_acc"])+"\t"
-            stout = stout + str(file_dict["max_acc"]) +"\n"
-                                
-            stout = stout + "prec \t" + str(file_dict["mean_prec"]) + "\t"
-            stout = stout + str(file_dict["max_prec"]) + "\n"
-                                
-            stout = stout +"rec \t" + str(file_dict["mean_rec"]) + "\t"
-            stout = stout + str(file_dict["max_rec"]) + "\n"
-            
-            stout = stout + "f1 \t" + str(file_dict["mean_f1"]) + "\t"
-            stout = stout + str(file_dict["max_f1"]) +"\n"
-            
-            stout = stout + "prec_weighted \t" + str(file_dict["mean_prec_w"]) + "\t"
-            stout = stout + str(file_dict["max_prec_w"]) + "\n"
-            
-            stout = stout +"rec_weighted \t" + str(file_dict["mean_rec_w"]) + "\t"
-            stout = stout + str(file_dict["max_rec_w"]) + "\n"
-            
-            stout = stout + "f1_weighted \t" + str(file_dict["mean_f1_w"]) + "\t"
-            stout = stout + str(file_dict["max_f1_w"]) +"\n"
-            
-            stout = stout + "prec_micro \t" + str(file_dict["mean_prec_micro"]) + "\t"
-            stout = stout + str(file_dict["max_prec_micro"]) + "\n"
-            
-            stout = stout +"rec_micro \t" + str(file_dict["mean_rec_micro"]) + "\t"
-            stout = stout + str(file_dict["max_rec_micro"]) + "\n"
-            
-            stout = stout + "f1_micro \t" + str(file_dict["mean_f1_micro"]) + "\t"
-            stout = stout + str(file_dict["max_f1_micro"]) +"\n"
-
-            print(stout)
+        try:
+            for num_s in num_slices[filename]:
+                s = do_cross_validation(filename, num_s, k)
+                #print("scores "+str(s)) #enable for very verbose
+                with open("metrics_slice_num_"+str(num_s)+"_"+filename, "w") as fp:
+                    json.dump(s, fp)
+                fp.close()
+                print("aggregates:")
+                # want calc_cross_valaggregates for each run associated with run parameters
+                file_dict = calc_cross_val_aggregates(s)
+                #print_by_cross_val_run(file_dict) #enable for verbose
+                #break; # comment out for full run
+                all_file_dict[filename] = file_dict
+        except ValueError:
+            print("Error on file"+filename)
+            continue
             #break; # comment out for full run
-        all_file_dict[filename] = file_dict
-        #break; # comment out for full run
-    with open("results_summary.json", "w") as fp:
-        json.dump(all_file_dict, fp)
+        with open("results_summary.json", "w") as fp:
+            json.dump(all_file_dict, fp)
           
     # want confusion matrix for best pair of file and num_slices
     # time provided runs:
