@@ -41,7 +41,8 @@ def do_cross_validation(filename, num_slices, k):
     run_num = 1
     for ((X_train, Y_train), (X_test, Y_test)) in data_gen:
         prepro_param = filename[13:-5]
-        Y_predicted = run_one_LR(X_train, Y_train, X_test, Y_train, prepro_param, run_num)
+        Y_predicted = run_one_LR(X_train, Y_train, X_test, Y_train, prepro_param
+                                 , run_count=run_num)
         a, f, p, r = calc_metrics(Y_test, Y_predicted)
         accuracies.append(a)
         f1s.append(f)
