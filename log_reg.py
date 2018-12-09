@@ -15,7 +15,7 @@ calc_cross_val_aggregates = util.calc_cross_val_aggregates
 # and Y_test sets, dumps model to file and returns predicted labels
 def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
                , solver='lbfgs', max_iter=1000, multi_class='multinomial'
-               , verbose=1, n_jobs=1, run_count=1):
+               , verbose=1, n_jobs=16, run_count=1):
     model = LogisticRegression(random_state=rand_seed, solver=solver, max_iter=max_iter
                                , multi_class=multi_class, n_jobs=n_jobs)
     model.fit(X_train, Y_train)
@@ -97,8 +97,15 @@ def main():
 
     k = 10
 
-    all_file_dict = dict()
+    #all_file_dict = dict()
+    try:
+        with open("results_summary.json", "r") as infile:
+            all_file_dict = json.loads(infile.read())
+    except:
+        all_file_dict = dict()
     for filename in files:
+        if filename in all_file_dict:
+            continue
         file_dict = dict()
         for num_s in num_slices[filename]:
             s = do_cross_validation(filename, num_s, k)
@@ -130,21 +137,21 @@ def main():
             stout = stout + "f1_weighted \t" + str(file_dict["mean_f1_w"]) + "\t"
             stout = stout + str(file_dict["max_f1_w"]) +"\n"
             
-            stout = stout + "prec_micro \t" + str(file_dict["mean_prec_m"]) + "\t"
-            stout = stout + str(file_dict["max_prec_m"]) + "\n"
+            stout = stout + "prec_micro \t" + str(file_dict["mean_prec_micro"]) + "\t"
+            stout = stout + str(file_dict["max_prec_micro"]) + "\n"
             
-            stout = stout +"rec_micro \t" + str(file_dict["mean_rec_m"]) + "\t"
-            stout = stout + str(file_dict["max_rec_m"]) + "\n"
+            stout = stout +"rec_micro \t" + str(file_dict["mean_rec_micro"]) + "\t"
+            stout = stout + str(file_dict["max_rec_micro"]) + "\n"
             
-            stout = stout + "f1_micro \t" + str(file_dict["mean_f1_m"]) + "\t"
-            stout = stout + str(file_dict["max_f1_m"]) +"\n"
+            stout = stout + "f1_micro \t" + str(file_dict["mean_f1_micro"]) + "\t"
+            stout = stout + str(file_dict["max_f1_micro"]) +"\n"
 
             print(stout)
-            break; # comment out for full run
+            #break; # comment out for full run
         all_file_dict[filename] = file_dict
-        break; # comment out for full run
+        #break; # comment out for full run
     with open("results_summary.json", "w") as fp:
-        json.dump(s, fp)
+        json.dump(all_file_dict, fp)
           
     # want confusion matrix for best pair of file and num_slices
     # time provided runs:
