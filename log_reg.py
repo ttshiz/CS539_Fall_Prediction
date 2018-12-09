@@ -1,11 +1,16 @@
 import load_data
-import run_hmm
-import numpy as np
+import util
 import math
 from sklearn.externals import joblib
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.linear_model import LogisticRegression
+
+setup = util.setup
+calc_metrics = util.calc_metrics
+matrix_n_report = util.matrix_n_report
+calc_cross_val_aggregates = util.calc_cross_val_aggregates
+
 # Trains logistic regression on X_train and Y_train sets, predicts labels on X_test
 # and Y_test sets, dumps model to file and returns predicted labels
 def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
@@ -28,7 +33,7 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
 # Runs k-fold Cross Validation on preprocessed data found in filename
 # with num_slices the number of preprocessed slices to include in each sample
 def do_cross_validation(filename, num_slices, k):
-    data_gen = run_hmm.setup(filename, num_slices, k)
+    data_gen = setup(filename, num_slices, k)
     scores = dict()
     accuracies = []
     f1s = []
@@ -38,13 +43,13 @@ def do_cross_validation(filename, num_slices, k):
     for ((X_train, Y_train), (X_test, Y_test)) in data_gen:
         prepro_param = filename[13:-5]
         Y_predicted = run_one_LR(X_train, Y_train, X_test, Y_train, prepro_param, run_num)
-        a, f, p, r = run_hmm.calc_metrics(Y_test, Y_predicted)
+        a, f, p, r = calc_metrics(Y_test, Y_predicted)
         accuracies.append(a)
         f1s.append(f)
         precisions.append(p)
         recalls.append(r)
         run_num = run_num +1
-        #break # comment out for full run, only here for testing
+        break # comment out for full run, only here for testing
     scores["accuracies"] = accuracies
     scores["f1s"] = f1s
     scores["precisions"] = precisions
@@ -52,15 +57,15 @@ def do_cross_validation(filename, num_slices, k):
     return scores
 
 def calc_cross_val_aggregates(scores):
-    mean_acc = np.mean(scores["accuracies"])
-    mean_f1 = np.mean(scores["f1s"])
-    mean_prec = np.mean(scores["precisions"])
-    mean_rec = np.mean(scores["recalls"])
+    mean_acc = math.mean(scores["accuracies"])
+    mean_f1 = math.mean(scores["f1s"])
+    mean_prec = math.mean(scores["precisions"])
+    mean_rec = math.mean(scores["recalls"])
 
-    max_acc = np.max(scores["accuracies"])
-    max_f1 = np.max(scores["f1s"])
-    max_prec = np.max(scores["precisions"])
-    max_rec = np.max(scores["recalls"])
+    max_acc = math.max(scores["accuracies"])
+    max_f1 = math.max(scores["f1s"])
+    max_prec = math.max(scores["precisions"])
+    max_rec = math.max(scores["recalls"])
     return mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec
 
 def main():
