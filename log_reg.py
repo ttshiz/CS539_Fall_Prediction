@@ -1,6 +1,5 @@
 import load_data
 import util
-import math
 from sklearn.externals import joblib
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score
@@ -21,7 +20,7 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
     model.fit(X_train, Y_train)
     Y_predict = model.predict(X_test)
 
-    print("Running cross val"+str(run_count)+"....")
+    print("Running cross val "+str(run_count)+"....")
     
     #filename = "lr_pre_" + prepro_param + "solver_" + str(solver) + "iter_"
     #filename = filename + str(max_iter) + "run_" + str(run_count) + ".pkl"
@@ -57,18 +56,6 @@ def do_cross_validation(filename, num_slices, k):
     scores["precisions"] = precisions
     scores["recalls"] = recalls
     return scores
-
-def calc_cross_val_aggregates(scores):
-    mean_acc = math.mean(scores["accuracies"])
-    mean_f1 = math.mean(scores["f1s"])
-    mean_prec = math.mean(scores["precisions"])
-    mean_rec = math.mean(scores["recalls"])
-
-    max_acc = math.max(scores["accuracies"])
-    max_f1 = math.max(scores["f1s"])
-    max_prec = math.max(scores["precisions"])
-    max_rec = math.max(scores["recalls"])
-    return mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec
 
 def main():
     max_slice_size_file =  "preprocessed_6.0E+09.json"
