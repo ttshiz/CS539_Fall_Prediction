@@ -21,13 +21,13 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
     model.fit(X_train, Y_train)
     Y_predict = model.predict(X_test)
 
-    print("Writing file....")
+    print("Running cross val"+str(run_count)+"....")
     
-    filename = "lr_pre_" + prepro_param + "solver_" + str(solver) + "iter_"
-    filename = filename + str(max_iter) + "run_" + str(run_count) + ".pkl"
-    joblib.dump(model, filename)
+    #filename = "lr_pre_" + prepro_param + "solver_" + str(solver) + "iter_"
+    #filename = filename + str(max_iter) + "run_" + str(run_count) + ".pkl"
+    #joblib.dump(model, filename)
     
-    print(Y_predict)
+    #print(Y_predict)
     return Y_predict
 
 # Runs k-fold Cross Validation on preprocessed data found in filename
@@ -49,7 +49,9 @@ def do_cross_validation(filename, num_slices, k):
         precisions.append(p)
         recalls.append(r)
         run_num = run_num +1
-        break # comment out for full run, only here for testing
+        print("accuracy: "+str(a)+" f1score: "+str(f)+" precision: "
+              +str(p)+" recall: "+str(r))
+        #break # comment out for full run, only here for testing
     scores["accuracies"] = accuracies
     scores["f1s"] = f1s
     scores["precisions"] = precisions
@@ -91,18 +93,23 @@ def main():
     k = 10
     
     s = do_cross_validation(single_filename, num_slices[single_filename][0], k)
+    print("scores "+str(s))
+    with open("metrics_"+single_filename, "w") as fp:
+        json.dump(s, fp)
+    
+    print("aggregates:")
     # want calc_cross_valaggregates for each run associated with run parameters
-    #mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec = calc_cross_val_aggregates(s)
-    #stout = "\t mean \t max \n" + "\t" + mean_acc + "\t" + max_acc + "\n"
-    #stout = stout + "\t" + mean_prec + "\t" + max_prec + "\n"
-    #stout = stout +"\t" + mean_rec+ "\t"+ max_rec + "\n"
-    #stout = stout + "\t" + mean_f1 + "\t" + max_f1 +"\n"
-    #print(stout)
+    mean_acc, mean_f1, mean_prec, mean_rec, max_acc, max_f1, max_prec, max_rec = calc_cross_val_aggregates(s)
+    stout = "\t mean \t max \n" + "\t" + mean_acc + "\t" + max_acc + "\n"
+    stout = stout + "\t" + mean_prec + "\t" + max_prec + "\n"
+    stout = stout +"\t" + mean_rec+ "\t"+ max_rec + "\n"
+    stout = stout + "\t" + mean_f1 + "\t" + max_f1 +"\n"
+    print(stout)
     # want confusion matrix for best pair of file and num_slices
     # time provided runs:
     #num_slices_reach = [256, 512, 1024]
     #reach_files = ["preprocessed_5.0E+06.json"]
-    print(s)
+    #print(s)
     return s
 
 if __name__ == "__main__":
