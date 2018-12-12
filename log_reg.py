@@ -28,6 +28,10 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
     #print(Y_predict)
     return Y_predict
 
+# does conversion from multi-class to binary
+def to_binary(Y_list):
+    return [(n in preprocess.FALL_LABELS) for n in test]
+    
 # Runs k-fold Cross Validation on preprocessed data found in filename
 # with num_slices the number of preprocessed slices to include in each sample
 def do_cross_validation(filename, num_slices, k):
@@ -49,7 +53,7 @@ def do_cross_validation(filename, num_slices, k):
         prepro_param = filename[13:-5]
         Y_predicted = run_one_LR(X_train, Y_train, X_test, Y_train, prepro_param
                                  , run_count=run_num)
-        a, f, p, r, f_w, p_w, r_w, f_m, p_m, r_m = calc_metrics(Y_test, Y_predicted)
+        a, f, p, r, f_w, p_w, r_w, f_m, p_m, r_m = calc_metrics(to_binary(Y_test), to_binary(Y_predicted))
         accuracies.append(a)
         f1s.append(f)
         precisions.append(p)
@@ -135,7 +139,7 @@ def main():
 
     #all_file_dict = dict()
     try:
-        with open("results_summary.json", "r") as infile:
+        with open("bin_results_summary.json", "r") as infile:
             all_file_dict = json.loads(infile.read())
     except:
         all_file_dict = dict()
@@ -147,7 +151,7 @@ def main():
             for num_s in num_slices[filename]:
                 s = do_cross_validation(filename, num_s, k)
                 #print("scores "+str(s)) #enable for very verbose
-                with open("metrics_slice_num_"+str(num_s)+"_"+filename, "w") as fp:
+                with open("bin_metrics_slice_num_"+str(num_s)+"_"+filename, "w") as fp:
                     json.dump(s, fp)
                 fp.close()
                 print("aggregates:")
@@ -160,7 +164,7 @@ def main():
             print("Error on file"+filename)
             continue
             #break; # comment out for full run
-        with open("results_summary.json", "w") as fp:
+        with open("bin_results_summary.json", "w") as fp:
             json.dump(all_file_dict, fp)
           
     # want confusion matrix for best pair of file and num_slices
