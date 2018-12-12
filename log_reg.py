@@ -54,7 +54,7 @@ def do_cross_validation(filename, num_slices, k):
         prepro_param = filename[13:-5]
         Y_predicted = run_one_LR(X_train, Y_train, X_test, Y_train, prepro_param
                                  , run_count=run_num)
-        a, f, p, r, f_w, p_w, r_w, f_m, p_m, r_m = calc_metrics(to_binary(Y_test), to_binary(Y_predicted))
+        a, f, p, r, f_w, p_w, r_w, f_m, p_m, r_m = calc_metrics(Y_test, Y_predicted)
         accuracies.append(a)
         f1s.append(f)
         precisions.append(p)
