@@ -1,4 +1,5 @@
 import load_data
+import preprocess
 import util
 import json
 from sklearn.externals import joblib
@@ -15,7 +16,7 @@ calc_cross_val_aggregates = util.calc_cross_val_aggregates
 # and Y_test sets, dumps model to file and returns predicted labels
 def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
                , solver='lbfgs', max_iter=1000, multi_class='multinomial'
-               , verbose=1, n_jobs=16, run_count=1):
+               , verbose=1, n_jobs=4, run_count=1):
     model = LogisticRegression(random_state=rand_seed, solver=solver, max_iter=max_iter
                                , multi_class=multi_class, n_jobs=n_jobs)
     model.fit(X_train, Y_train)
@@ -30,7 +31,7 @@ def run_one_LR(X_train, Y_train, X_test, Y_test, prepro_param, rand_seed=None
 
 # does conversion from multi-class to binary
 def to_binary(Y_list):
-    return [(n in preprocess.FALL_LABELS) for n in test]
+    return [(n in preprocess.FALL_LABELS) for n in Y_list]
     
 # Runs k-fold Cross Validation on preprocessed data found in filename
 # with num_slices the number of preprocessed slices to include in each sample
@@ -117,8 +118,9 @@ def print_by_cross_val_run(file_dict):
             
 def main():
     max_slice_size_file =  "preprocessed_6.0E+09.json"
-    files = ["preprocessed_5.0E+09.json", "preprocessed_2.5E+09.json"
-             ,  "preprocessed_1.0E+09.json"#, "preprocessed_5.0E+08.json"
+    files = ["preprocessed_6.0E+09.json", "preprocessed_5.0E+09.json"
+             , "preprocessed_2.5E+09.json"
+             ,  "preprocessed_1.0E+09.json", "preprocessed_5.0E+08.json"
              ,  "preprocessed_2.5E+08.json", "preprocessed_5.0E+07.json"
              ,  "preprocessed_2.5E+07.json",  "preprocessed_5.0E+06.json"]
     num_slices = dict()
@@ -159,7 +161,7 @@ def main():
                 file_dict = calc_cross_val_aggregates(s)
                 #print_by_cross_val_run(file_dict) #enable for verbose
                 #break; # comment out for full run
-                all_file_dict[filename] = file_dict
+                all_file_dict[filename+str(num_s)] = file_dict
         except ValueError:
             print("Error on file"+filename)
             continue

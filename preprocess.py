@@ -102,3 +102,14 @@ def write_to_json(data):
     with open("preprocessed_"+("%.1E"%data["slice_size"])+".json", "w") as fp:
         json.dump(data, fp)
 
+
+def main(slice_size):
+    
+    print("Processing Directory")
+    data = process_directory(slice_size)
+    print("Writing File")
+    write_to_json(data)
+
+if __name__ == "__main__":
+    ss = sys.argv[1];
+    main(ss)

@@ -8,23 +8,27 @@ KEY_LIST = ["x_min", "y_min", "z_min", "x_max", "y_max", "z_max", "x_std", "y_st
             , "x_mean", "y_mean", "z_mean", "x_slope", "y_slope", "z_slope", "x_zc"
             , "y_zc", "z_zc", "x_mmd", "y_mmd", "z_mmd"]                         
 
+#splits a list into length n chunks
 def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i +n]
 
+#calculate label for window
 def window_label_multi(labels):
     intersect = set(labels).intersection(FALL_LABELS)
     if intersect:
         return intersect.pop()
     else:
         return Counter(labels).most_common(1)[0][0]
-
+    
+#combine multiple readings into one window
 def window_X(window):
     wlist = []
     for w in window:
         wlist.extend([w[k] for k in KEY_LIST])
     return wlist
 
+#convert a single recording into a tuple of x recording windows and y recording windows
 def convert(datum, num_slices):
     recording_X = []
     recording_Y = []
@@ -34,6 +38,7 @@ def convert(datum, num_slices):
         recording_X.insert(0, window_X(window))
     return (recording_X, recording_Y)
 
+#convert a list of recordings into a tuple of x recording windows and y recording windows
 def convert_list(recordings, num_slices):
     recordings_X = []
     recordings_Y = []
