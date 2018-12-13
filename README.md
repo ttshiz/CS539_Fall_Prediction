@@ -21,6 +21,10 @@ There are several factors being considered in algorithm selection. Given the siz
 ### Metrics
 To evaluate the tool: F1 Scoring and k-fold cross-validation will be used.  Time permitting the tool will also be tested on one or more of the datasets listed above but not used in the training of the tool.
 
+## Running the code
+For decisioTree file, it colud be running using ipython in terminal by calling DTclass(filename, num_slices, k=10) method.
+For example: dt.DTclass("preprocessed_1.0E+09.json", 1, 10)
+
 ## Future Work
 Since, of the publicly available datasets, the majority of the datasets are not very large.  Thus, the first step of the project will be finding the subset of the datasets: DLR, MobiAct, TST Fall detection, tFall, UR Fall Detection, Cogent Labs, Gravity Project, Graz, UMAFall, SisFall, and UniBiB SHAR that is most compatible with both each other and the goals of the project.
 Since, the parameters of the samples vary across the datasets finding a compatible subset and appropriate means of normalizing the data will facilitate further study.  For example, the sampling rate for the provided accelerometer data varies between 5 and 256 Hz across the datasets.  The sample duration in seconds and variance also varies across the data sets: the shortest mean sample of a study is 1s seconds and the longest is 27.53 seconds, while the shortest sample is 0.18 seconds and the longest sample is 961.23 seconds.  Each of the studies also has labels for each of the samples.  These labels are broken into two categories: Falls and Activities of Daily Living (ADLs).  Each study has 1 to 19 types of ADLs and 1 to 15 types of falls, but these labels are not normalized across the datasets.  These are some of the many variables that prohibit, the blind combination of the datasets.
