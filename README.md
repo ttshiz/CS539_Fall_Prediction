@@ -16,22 +16,37 @@ The dataset we used in this project can be found at:
 https://bmi.teicrete.gr/en/the-mobifall-and-mobiact-datasets-2/
 
 ### Example Data Instance
-An example of a slice of the time series data from one data collection trial from the MobiAct dataset is as follows: 
+An example reading from the time series data from one data collection trial from the MobiAct dataset is as follows: 
 1913880219000, 0.90021986, -9.557653, -1.4939818
 1914086499000, 0.7565677, -9.5385, -1.13964
 1914287283000, 1.0151415, -9.490616, -1.292869
-The first entry in each tuple is the time stamp, followed by the acceleration force along the x, y, and z axes respectively.
+The first entry in each tuple is the time stamp in nanoseconds, followed by the acceleration force along the x, y, and z axes respectively in meters per second squared.
 ## Algorithm Selection
 ### Preprocessing
-Due to the temporal nature of the data methods, we will test using a grid search to find appropriate slicing of the data, a Fourier Transform based approach, and time permitting combinations of the two or other methods of extracting features from the time sequence.
-###Main Algorithm
-There are several factors being considered in algorithm selection. Given the sizes of the available datasets overfitting is a major concern.  Furthermore, since there are various smartphones on the market and for the longevity of the usefulness of the tool, the techniques used will need to be tolerant to this variability.  Some of the top candidates for the main algorithm include Recurrent Neural Networks (RNN), Support Vector Machines (SVM), and Hidden Markov Models (HMM).  RNNs are considered due to their ability to perform reasonably on temporal data approach. Similarly since, some of the previous work on fall detection has found some success with SVMs and HMMs they may also be a good candidate for prediction.  All of these techniques have the potential for better results than basic statistical thresholding, since they may reduce false positives.
+Our goals for preprocessing were two fold.  First to only use light/easy to compute methods to make the algorithm easily portable to a smartphone and not drain batteries too quickly.  Second to maintain the high accuracies we found in existing research.  To do this we decided to slice the data in to uniform lengths of time and compute simple features like the mean of the slice for each of these slices.  We would then feed a fixed number of these slices to the machine learning algorithms as a learning data instance. To explore the possible combinations of slice length (in nanoseconds) and the number of slices, we employed an exponential grid search.  We started the search from the larger slice lengths that we knew can work well from previous research, and worked our way down to smaller lengths, that we did not find in our literature search.
+### Main Algorithm
+#### Selection
+There were several factors considered in algorithm selection. Given the sizes of the available datasets overfitting is a major concern.  Furthermore, since there are various smartphones on the market and for the longevity of the usefulness of the tool, the techniques used will need to be tolerant to this variability.  Some of the top candidates for the main algorithm were Decision Trees (DTs), Recurrent Neural Networks (RNNs), Support Vector Machines (SVMs), and Hidden Markov Models (HMMs).  RNNs are considered due to their ability to perform reasonably on temporal data approach. Similarly since, some of the previous work on fall detection has found some success with SVMs and HMMs they may also be a good candidate for prediction.  Finally we considered Decision Trees since they were a nice easily computable model and we wanted to determine even they could perform well.  All of these techniques had the potential for better results than basic statistical thresholding, since they may reduce false positives.
+#### Implementation
+In the end we performed the majority of our study using Decision Trees and Logistic Regression.  We favored these methods due to the quality of the available libraries, given we were focusing on preprocessing techniques.  We also started implementing our own Hidden Markov Model for Gaussian Classification, using some of the framework for the (now unsupported) hmmlearn library but this did not achieve production quality before the deadline.
+We used multi-class classification with a post-processing filter into the binary classification, to attempt to minimize the number of false positives in the end results. 
 ### Metrics
-To evaluate the tool: F1 Scoring and k-fold cross-validation will be used.  Time permitting the tool will also be tested on one or more of the datasets listed above but not used in the training of the tool.
+To evaluate the tool, accuracy and F1 Scoring were be the primary metrics calculated, with others calculated so verify conclusions.  These metrics were calculated for each run in k-fold cross-validation, with k=10.
+## Results and Discussion
+We achieved mid-to-high 80% accuracies in the multi-class problem and near 100% accuracies in the binary classification.  Showing there is good potential for computationally-simple machine learning algorithms with mimimal preprocessing to provide the basis for early-fall detection algorithms.  Also since the accuracies were so high, this may imply that there is room for improvement in making the slice sizes even smaller.
 
-## Running the code
-For decisioTree file, it colud be running using ipython in terminal by calling DTclass(filename, num_slices, k=10) method.
+## Dependencies and Running the code
+This project was developed in python3, while attempts were made to ensure pypy compatibility, there is not full compliance given the current state of numpypy compatibility, thus we recommend using the basic python3 to run the files.
+This project is dependent on sklearn and numpy as well as several standard libraries (i.e. csv).
+
+To preprocess the dataset the way we did run python3 preprocess.py in the directory above the dataset folder. Warning preprocessing will take several minutes to a few hours depending on the computer it is run on, similar warnings apply to the training of the following algorithms.
+
+For the decisionTree file, it can be run using ipython3 in terminal by calling DTclass(filename, num_slices, k=10) method.
 For example: dt.DTclass("preprocessed_1.0E+09.json", 1, 10)
+
+To run the logistic regression  run python3 log_reg.py in the same directory where preprocess.py was run.
+
+There are comments in the code that can be toggled to vary the level of verbosity, among other quality of life things.
 
 ## Future Work
 Since, of the publicly available datasets, the majority of the datasets are not very large.  Thus, the first step of the project will be finding the subset of the datasets: DLR, MobiAct, TST Fall detection, tFall, UR Fall Detection, Cogent Labs, Gravity Project, Graz, UMAFall, SisFall, and UniBiB SHAR that is most compatible with both each other and the goals of the project.
