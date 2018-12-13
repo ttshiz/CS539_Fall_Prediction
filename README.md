@@ -6,7 +6,15 @@ Falls play an important role in loss of self-governance, fatalities and  injurie
 Considering aforementioned challenges, we aim to design, develop, and perform preliminary testing of a novel and efficient technique that can be implemented in an embedded hardware device such as smartphone to identify and possibly even predict falls before they happen. The work will be focus on the use of fast and efficient techniques based on new statistical features and classification will be performed using the most commonly used machine-learning based classifiers in literature.
 
 ## Dataset Selection and Description
-Since there is not much research into fall prediction or extremely early detection using smartphones or strategies that would be extensible to the sensors found in smartphones such as wearable Fall Detection Systems (FDS), the authors expanded the dataset search criteria to include datasets used or collected for fall detection studies.  Furthermore, since smartphone data or a similar enough set of sensors was desired, the subset of fall detection studies or datasets that was most appropriate was ones where they tested FDS systems or collected the requisite data for such testing.  The FARSEEING real-world fall repository was considered because it has real, not simulated, fall accelerometer measurements.  The drawbacks of this dataset is that only 20 fall events are available upon request and further collaboration for full access is likely outside the scope of a term project. If access to the 20 fall events is made available, it may be used as testing data.  
+Since there is not much research into fall prediction or extremely early detection using smartphones or strategies that would be extensible to the sensors found in smartphones such as wearable Fall Detection Systems (FDS), the authors expanded the dataset search criteria to include datasets used or collected for fall detection studies.  Furthermore, since smartphone data or a similar enough set of sensors was desired, the subset of fall detection studies or datasets that was most appropriate was ones where they tested FDS systems or collected the requisite data for such testing.  The FARSEEING real-world fall repository was considered because it has real, not simulated, fall accelerometer measurements.  The drawbacks of this dataset is that only 20 fall events are available upon request and further collaboration for full access is likely outside the scope of a term project. If access to the 20 fall events is made available, it may be used as testing data at a future date.
+
+### Dataset
+We used the second realease of the MobiAct dataset, collected by T.E.I. of Crete to develop our techniques and perform our study.  This dataset includes 4 different types of falls and 12 different Activities of Daily Life/Living (ADLs), performed by a total of 66 subjects with more than 3200 trials, all captured by smartphone.
+
+#### To obtain the dataset:
+The dataset we used in this project can be found at:
+https://bmi.teicrete.gr/en/the-mobifall-and-mobiact-datasets-2/
+
 ### Example Data Instance
 An example of a slice of the time series data from one data collection trial from the MobiAct dataset is as follows: 
 1913880219000, 0.90021986, -9.557653, -1.4939818
