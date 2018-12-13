@@ -8,16 +8,17 @@ from collections import Counter
 
 FALL_LABELS = set([b'FOL', b'FKL', b'BSC', b'SDL'])
 
-#one dimension
+# Calculates the number of times the sample crosses zero
+# for one dimension
 def zero_crossings(slice):
     return np.where(np.diff(np.signbit(slice)))[0].size
 
-#Wafaa's metric
+# Wafaa's metric
 def min_max_distance(slice):
     return np.sqrt(np.square(np.amax(slice) - np.amin(slice))
                    + (np.square(np.argmax(slice) - np.argmin(slice))))
     
-# for each dimension still need to set
+# Calculates metrics for each dimension
 def process_slice(slice):
     #print(slice)
     def slice_get(name):
@@ -57,7 +58,8 @@ def process_slice(slice):
         [v["label"] for v in slice]).most_common(1)[0][0]
 
     return slice_features
- 
+
+# Preprocesses one file for a given slice_size (nanoseconds)
 def process_file(file_name, slice_size):
     try:
         #data = np.genfromtxt(file_name, dtype=None, delimiter=',', names=True)
@@ -92,6 +94,7 @@ def process_file(file_name, slice_size):
         print("Error Processing "+file_name + " " + str(e))
         return False
 
+# Preprocesses the dataset directory for a given slice_size (nanoseconds)
 def process_directory(slice_size):
     data = dict(slice_size=slice_size)
     for file in glob.glob("MobiAct_Dataset_v2.0/**/*_annotated.csv", recursive=True):
@@ -103,6 +106,7 @@ def write_to_json(data):
         json.dump(data, fp)
 
 
+# main function to enable running in terminal
 def main(slice_size):
     
     print("Processing Directory")

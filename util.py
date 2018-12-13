@@ -28,14 +28,14 @@ def calc_metrics(Y_truth, Y_predict):
     #return met_dict
     return acc, f1, prec, rec, f1_w, prec_w, rec_w, f1_micro, prec_micro, rec_micro
   
-  
+# Calculates classification report and confusion matrix given predicted, and true labels  
 def matrix_n_report(Y_truth, Y_predict, filename=None):
     #Calculated dictionary of classification metrics mapping label: set of metrics
     cr = classification_report(Y_truth, Y_predict, output_dict=True)
     cm = confusion_matrix(Y_truth, Y_predict)
     return cr, cm
 
-
+# Calculates mean and max results across the multiple runs of cross validation
 def calc_cross_val_aggregates(scores):
     score_dict = dict()
     score_dict["mean_acc"] = np.mean(scores["accuracies"])
