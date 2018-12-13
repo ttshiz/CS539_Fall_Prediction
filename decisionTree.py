@@ -8,10 +8,8 @@ from collections import Counter
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.metrics import classification_report, confusion_matrix  
 import pandas as pd
-from sklearn.metrics import roc_curve, auc
 
-#with open('/Users/wafaaalmuhammadi/Documents/FallPrediction/preprocessed_5.0E+07.json') as f:
-#    data = json.load(f)
+
 
 FALL_LABELS = set([b'FOL', b'FKL', b'BSC', b'SDL'])
 
@@ -86,63 +84,41 @@ def DTclass(filename, num_slices, k=10):
     split_data = ld.split_data_kfold(filename, num_slices, k)
     gen = ld.validation_cases(split_data)
 
-    # fit a decision tree with depths ranging from 1 to 32 and plot the training and test auc scores.
-    max_depths = np.linspace(1, 32, 32, endpoint=True)
-    metrics = dict()
     accuracies = []
     f1s = []
     precisions = []
     recalls = []
 
-    train_results = []
-    test_results = []
     for ((X_train, Y_train), (X_test, Y_test)) in gen:
-        #estimator = DecisionTreeClassifier(max_leaf_nodes=3, random_state=0)
-        clf = DecisionTreeClassifier(criterion= "gini", splitter="random", max_depth=None, min_samples_split =2 
+        clf = DecisionTreeClassifier(criterion= "entropy", splitter="best", max_depth=None, min_samples_split =2
                                      , min_samples_leaf=1, min_weight_fraction_leaf=0, max_features=None, random_state=None
-                                     , max_leaf_nodes= None, min_impurity_decrease=0, min_impurity_split=1e-7)
+                                     , max_leaf_nodes= None, min_impurity_decrease=0)
         clf = clf.fit(X_train, Y_train)
         
         y_predict = clf.predict(X_test)
+        train = clf.predict(X_train)
         
         accuracy = accuracy_score(Y_test, y_predict)
-        f1_scr = f1_score(Y_test, y_predict, average='macro')
-        precision = precision_score(Y_test, y_predict, average='macro')
-        recall = recall_score(Y_test, y_predict, average='macro')
+        f1_scr = f1_score(Y_test, y_predict, average='weighted')
+        precision = precision_score(Y_test, y_predict, average='weighted')
+        recall = recall_score(Y_test, y_predict, average='weighted')
 
-        #print('acc = ', accuracy, '  f1Score = ', f1_scr, ' precision = ', precision, ' recall = ', recall)
-        
         accuracies.append(accuracy*100)
         f1s.append(f1_scr*100)
         precisions.append(precision*100)
         recalls.append(recall*100)
 
-    
 
-        #calculated_metrics = calculate_metrics(predicted_labels, Y_test)
-        #list_of_metrics = accuracy #calculated_metrics
-        #cm= confusion_matrix(Y_test, y_predict)
-        #print(confusion_matrix(Y_test,y_predict))  
-        #print(classification_report(Y_test, y_predict))  
-        #columns=['Predicted Not Fall', 'Predicted Fall'],index=['True Not Fall', 'True Fall'])
-            #break
-
-    #cm= confusion_matrix(Y_test, y_predict)
-
-    metrics["accuracies"] = accuracies
-    metrics["f1scores"] = f1s
-    metrics["precisions"] = precisions
-    metrics["recalls"] =  recalls
-
-    mean_acc = np.mean(metrics["accuracies"])
+    mean_acc = np.mean(accuracies)
     mean_f1s = np.mean(f1s)
     mean_recall = np.mean(recalls)
     mean_precisions = np.mean(precisions)
 
-    max_acc = np.max(metrics["accuracies"])
+    max_acc = np.max(accuracies)
     max_f1s = np.max(f1s)
     max_recall = np.max(recalls)
     max_precisions = np.max(precisions)
+
 
         
     print("mean accuracies:%s " % mean_acc, "  max accuracies: %s  " % max_acc)
@@ -150,21 +126,6 @@ def DTclass(filename, num_slices, k=10):
     print("mean recall:%s " % mean_recall, "  max recall: %s " % max_recall)
     print("mean precisions :%s " % mean_precisions, "  max precisions: %s " % max_precisions)
 
-    #from matplotlib.legend_handler import HandlerLine2D
-    #line1, = plt.plot(max_depths, train_results, 'b', label="Train AUC")
-    #line2, = plt.plot(max_depths, test_results, 'r', label="Test AUC"
-    #plt.legend(handles=[line1])#:HandlerLine2D(numpoints=2)})
-    #plt.ylabel('AUC score')
-    #plt.xlabel('Tree depth')
-    #plt.show()
 
-    #print("Accuracy for Decision Tree Classifier: " + str(accuracy*100)+"%")
-    #print("F1_score for Decision Tree Classifier: " + str(f1_scr*100)+"%")
-    #print("Precision for Decision Tree Classifier: " + str(precision*100)+"%")
-    #print("Recall for Decision Tree Classifier: " + str(recall*100)+"%")
     return metrics
     
-
-    # to save changes inthe files do
-    # %load_ext autoreload
-    # %autoreload 2
