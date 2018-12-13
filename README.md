@@ -9,13 +9,13 @@ Considering aforementioned challenges, we aim to design, develop, and perform pr
 Since there is not much research into fall prediction or extremely early detection using smartphones or strategies that would be extensible to the sensors found in smartphones such as wearable Fall Detection Systems (FDS), the authors expanded the dataset search criteria to include datasets used or collected for fall detection studies.  Furthermore, since smartphone data or a similar enough set of sensors was desired, the subset of fall detection studies or datasets that was most appropriate was ones where they tested FDS systems or collected the requisite data for such testing.  The FARSEEING real-world fall repository was considered because it has real, not simulated, fall accelerometer measurements.  The drawbacks of this dataset is that only 20 fall events are available upon request and further collaboration for full access is likely outside the scope of a term project. If access to the 20 fall events is made available, it may be used as testing data at a future date.
 
 ### Dataset
-We used the second realease of the MobiAct dataset, collected by T.E.I. of Crete to develop our techniques and perform our study.  This dataset includes 4 different types of falls and 12 different Activities of Daily Life/Living (ADLs), performed by a total of 66 subjects with more than 3200 trials, all captured by smartphone.
+We used the second realease of the MobiAct dataset, collected by T.E.I. of Crete to develop our techniques and perform our study.  This dataset includes 4 different types of falls and 12 different Activities of Daily Life/Living (ADLs), performed by a total of 66 subjects with more than 3200 trials, all captured by smartphone[2].
 
 #### To obtain the dataset:
 The dataset we used in this project can be found at:
 https://bmi.teicrete.gr/en/the-mobifall-and-mobiact-datasets-2/
 
-### Example Data Instance
+#### Example Data Instance
 An example reading from the time series data from one data collection trial from the MobiAct dataset is as follows: 
 1913880219000, 0.90021986, -9.557653, -1.4939818
 1914086499000, 0.7565677, -9.5385, -1.13964
@@ -46,7 +46,7 @@ For example: dt.DTclass("preprocessed_1.0E+09.json", 1, 10)
 
 To run the logistic regression  run python3 log_reg.py in the same directory where preprocess.py was run.
 
-There are comments in the code that can be toggled to vary the level of verbosity, among other quality of life things.
+There are comments in the code that can be toggled to vary the level of verbosity, among other quality of life things, and the files util.py and load_data.py provide helper functions and utilities for the other files.
 
 ## Future Work
 Since, of the publicly available datasets, the majority of the datasets are not very large.  Thus, the first step of the project will be finding the subset of the datasets: DLR, MobiAct, TST Fall detection, tFall, UR Fall Detection, Cogent Labs, Gravity Project, Graz, UMAFall, SisFall, and UniBiB SHAR that is most compatible with both each other and the goals of the project.
@@ -55,3 +55,4 @@ However what is most important to this study each of these datasets have in comm
 
 ## References
 [1] Mauldin, T.R.; Canby, M.E.; Metsis, V.; Ngu, A.H.H.; Rivera, C.C. SmartFall: A Smartwatch-Based Fall Detection System Using Deep Learning. Sensors 2018, 18, 3363.
+[2] Chatzaki C., Pediaditis M., Vavoulas G., Tsiknakis M. (2017) Human Daily Activity and Fall Recognition Using a Smartphone’s Acceleration Sensor. In: Rocker C., O’Donoghue J., Ziefle M., Helfert M., Molloy W. (eds) Information and Communication Technologies for Ageing Well and e-Health. ICT4AWE 2016. Communications in Computer and Information Science, vol 736, pp 100-118. Springer, Cham, DOI 10.1007/978-3-319-62704-5_7.
